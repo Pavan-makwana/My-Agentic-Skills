@@ -59,6 +59,7 @@ flowchart TD
 | **`paint-frame-reel-renderer`** | [`skills/paint-frame-reel-renderer`](./skills/paint-frame-reel-renderer) | Video Engine | Headless Chrome + FFmpeg concat demuxer engine for pixel-perfect 1080×1920 9:16 vertical MP4 rendering. |
 | **`youtube-media-extractor`** | [`skills/youtube-media-extractor`](./skills/youtube-media-extractor) | Audio/Media | Single-command `yt-dlp` and FFmpeg utility for downloading high-fidelity 48kHz audio streams. |
 | **`telegram-reel-publisher`** | [`skills/telegram-reel-publisher`](./skills/telegram-reel-publisher) | Distribution | Zero-dependency Telegram Bot API integration for auto-uploading and streaming 1080×1920 reels. |
+| **`linkedin-marketing-automation`** | [`skills/linkedin-marketing-automation`](./skills/linkedin-marketing-automation) | Growth & B2B | Autonomous B2B LinkedIn Company Page publishing via Buffer GraphQL API, deterministic 1200×627 cards, and Discord review gating. |
 
 ---
 

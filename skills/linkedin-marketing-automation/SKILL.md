@@ -43,7 +43,7 @@ flowchart TD
 ## 🎯 When to Use This Skill
 
 1. **LinkedIn Company Page Publishing:** You need to automate scheduled posts to a LinkedIn Organization/Company Page without getting blocked by LinkedIn Developer Platform partner restrictions.
-2. **Founder-Led Marketing:** You want automated drafting, staging, and scheduling of technical case studies, SaaS product spotlights, and engineering insights.
+2. **Founder-Led Marketing & World AI News:** You want automated drafting, staging, and scheduling of technical case studies, SaaS product spotlights, and daily curated worldwide AI news digests (frontier models, autonomous agents, and inference).
 3. **Deterministic Visual Generation:** You need 1200×627 landscape social cards generated programmatically from real product screenshots and brand design tokens without AI hallucinations.
 4. **Discord Co-Pilot Review:** You want drafts and graphics delivered to a private Discord channel for 1-click team review before anything goes live.
 
@@ -267,6 +267,26 @@ class DiscordNotifier:
                 "payload_json": (None, json.dumps(payload))
             }
             requests.post(self.webhook_url, files=files, timeout=20)
+```
+
+---
+
+## 🌍 Autonomous Daily World AI News Pipeline
+
+To maintain high authority and explosive organic reach beyond self-promotional content, the skill includes a **Daily Global AI News Engine** (`scripts/ai_news_fetcher.py`):
+
+1. **Autonomous Ingestion:** Connects to live feeds (TechCrunch AI, Hacker News, Arxiv, GitHub AI) to discover breaking frontier developments, model releases, and infrastructure breakthroughs.
+2. **De-Noising & Filtering:** Strips gossip and extracts 3–4 high-density stories (Frontier Models, Distributed Inference, Autonomous Computer-Use Agents, Hardware).
+3. **Synthesis Engine:** Crafts high-conversion LinkedIn posts with an urgent opening hook, concrete bullet breakdowns, a strategic macro perspective ("The Big Picture"), and an engaging debate question to drive comment velocity.
+4. **Automated Buffer Scheduling:** Automatically targets 9:00 PM IST (15:30 UTC) daily without manual intervention.
+
+```python
+from scripts.ai_news_fetcher import AINewsFetcher
+
+# Runs on cron or background daemon
+fetcher = AINewsFetcher()
+result = fetcher.schedule_daily_post(target_hour=21, target_minute=0)
+print(f"Scheduled Post ID: {result['buffer_post_id']} for {result['scheduled_time']}")
 ```
 
 ---

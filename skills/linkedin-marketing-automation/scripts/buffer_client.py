@@ -199,6 +199,13 @@ class BufferClient:
         result = data.get("createPost", {})
 
         if "message" in result:
+            # If first comment failed due to plan restriction, retry cleanly without metadata
+            if "first comment requires a paid plan" in result["message"].lower() and "metadata" in post_input:
+                del post_input["metadata"]
+                data = self._execute(mutation, {"input": post_input})
+                result = data.get("createPost", {})
+
+        if "message" in result:
             raise BufferPublishingError(f"Buffer Mutation Error: {result['message']}")
 
         post_info = result.get("post", {})

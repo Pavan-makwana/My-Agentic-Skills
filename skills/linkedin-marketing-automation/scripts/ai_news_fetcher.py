@@ -1,11 +1,12 @@
 """Global AI News Fetcher & LinkedIn Publisher Script.
 
 Fetches real-time worldwide AI breakthroughs, open-source models,
-and autonomous agent developments, synthesizes high-engagement LinkedIn posts,
-renders 1200x627 visual social cards, and schedules them daily via Buffer.
+and autonomous agent developments, synthesizes clean LinkedIn posts (strictly zero raw markdown asterisks),
+renders 1200x627 visual social cards, and schedules them daily at 9:00 PM IST via Buffer.
 """
 
 import os
+import sys
 import re
 import json
 import urllib.request
@@ -13,6 +14,13 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timezone, timedelta
 from zoneinfo import ZoneInfo
 from pathlib import Path
+
+# Force UTF-8 stdout
+if sys.stdout and hasattr(sys.stdout, 'reconfigure'):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+    except Exception:
+        pass
 
 
 def clean_html(raw_html: str) -> str:
@@ -40,12 +48,29 @@ def clean_html(raw_html: str) -> str:
     return ' '.join(cleaned.split())
 
 
+def clean_for_linkedin(text: str) -> str:
+    """Strips Markdown bold (**), italics (*), and backticks (`) so text renders cleanly on LinkedIn without raw asterisks."""
+    if not text:
+        return ""
+    # Strip bold **text** -> text
+    text = re.sub(r'\*\*(.*?)\*\*', r'\1', text)
+    # Strip italics *text* or _text_ -> text
+    text = re.sub(r'(?<!\w)\*(.*?)\*(?!\w)', r'\1', text)
+    # Strip inline backticks `code` -> code
+    text = re.sub(r'`(.*?)`', r'\1', text)
+    # Normalize smart quotes and dashes
+    text = text.replace('’', "'").replace('‘', "'").replace('“', '"').replace('”', '"')
+    return text.strip()
+
+
 class AINewsFetcher:
     """Fetches, curates, and formats daily world AI news for LinkedIn publishing."""
 
     FEEDS = [
         "https://techcrunch.com/category/artificial-intelligence/feed/",
-        "https://news.ycombinator.com/rss"
+        "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
+        "https://news.ycombinator.com/rss",
+        "https://arxiv.org/rss/cs.AI"
     ]
 
     KEYWORDS = [
@@ -74,15 +99,35 @@ class AINewsFetcher:
                 )
                 with urllib.request.urlopen(req, timeout=10) as resp:
                     tree = ET.fromstring(resp.read())
-                    for item in tree.findall('.//item'):
-                        raw_title = item.find('title').text if item.find('title') is not None else ''
-                        raw_desc = item.find('description').text if item.find('description') is not None else ''
-                        link = item.find('link').text if item.find('link') is not None else ''
+                    raw_items = tree.findall('.//item')
+                    if not raw_items:
+                        raw_items = tree.findall('.//{http://www.w3.org/2005/Atom}entry')
+
+                    for item in raw_items:
+                        t_node = item.find('title')
+                        if t_node is None:
+                            t_node = item.find('{http://www.w3.org/2005/Atom}title')
+                        raw_title = t_node.text if t_node is not None else ''
+
+                        d_node = item.find('description')
+                        if d_node is None:
+                            d_node = item.find('{http://www.w3.org/2005/Atom}summary')
+                        if d_node is None:
+                            d_node = item.find('{http://www.w3.org/2005/Atom}content')
+                        raw_desc = d_node.text if d_node is not None else ''
+
+                        l_node = item.find('link')
+                        if l_node is not None and l_node.text:
+                            link = l_node.text
+                        elif l_node is not None and l_node.get('href'):
+                            link = l_node.get('href')
+                        else:
+                            link = ''
 
                         title = clean_html(raw_title)
                         desc = clean_html(raw_desc)
 
-                        if not title or title.lower() in seen_titles:
+                        if not title or len(title) < 15 or title.lower() in seen_titles:
                             continue
 
                         haystack = (title + " " + desc).lower()
@@ -90,7 +135,7 @@ class AINewsFetcher:
                             seen_titles.add(title.lower())
                             items.append({
                                 "title": title,
-                                "summary": desc[:260],
+                                "summary": desc[:250],
                                 "link": link
                             })
                             if len(items) >= limit:
@@ -98,7 +143,6 @@ class AINewsFetcher:
             except Exception as e:
                 print(f"[AINewsFetcher] Warning: failed to fetch {feed_url}: {e}")
 
-        # Fallback to curated world AI themes if feeds are empty or blocked
         if len(items) < 3:
             items.extend(self._get_fallback_stories())
 
@@ -114,7 +158,7 @@ class AINewsFetcher:
             },
             {
                 "title": "Open-Source Models Close the Proprietary Gap: Nemotron 3.5 & Sovereign AI",
-                "summary": "NVIDIA and the European AI ecosystem roll out enterprise open-weight suites designed for sovereign, on-prem agentic automation.",
+                "summary": "NVIDIA and the European AI ecosystem roll out enterprise open-weight suites designed for sovereign, on-prem agentic automation without cloud lock-in.",
                 "link": "https://nvidia.com"
             },
             {
@@ -130,23 +174,23 @@ class AINewsFetcher:
         ]
 
     def synthesize_post(self, news_items: list[dict], timezone_str: str = "Asia/Kolkata") -> tuple[str, str, str]:
-        """Synthesizes high-performing LinkedIn commentary with hooks and takeaways."""
+        """Synthesizes high-performing LinkedIn commentary strictly without markdown asterisks (**)."""
         today_date = datetime.now(ZoneInfo(timezone_str)).strftime('%B %d, %Y')
         
         hook = f"The global AI landscape is moving at breakneck speed. Here are the {len(news_items)} biggest breakthroughs you need to know today ({today_date}):"
 
         bullet_blocks = []
         for i, item in enumerate(news_items, 1):
-            title = item['title'].strip()
-            summary = item['summary'].strip()
-            bullet_blocks.append(f"{i}️⃣ **{title}**\n• {summary}")
+            title = clean_for_linkedin(item['title'].strip())
+            summary = clean_for_linkedin(item['summary'].strip())
+            bullet_blocks.append(f"{i}️⃣ {title}\n↳ {summary}")
 
         stories_text = "\n\n".join(bullet_blocks)
 
         macro_takeaway = (
-            "💡 **The Big Picture:**\n"
+            "💡 THE BIG PICTURE:\n"
             "We have moved past the era of novelty text prompts. The real battleground in 2026 is "
-            "**production-grade infrastructure**: sovereign open-weight models, distributed inference efficiency, "
+            "production-grade infrastructure: sovereign open-weight models, distributed inference efficiency, "
             "and true autonomous agents that operate across operating systems."
         )
 
@@ -160,7 +204,7 @@ class AINewsFetcher:
             "#AIAgents #TechNews #DeepLearning #LLM #SoftwareEngineering #CloudComputing"
         )
 
-        post_copy = f"""{hook}
+        raw_post = f"""{hook}
 
 {stories_text}
 
@@ -170,20 +214,22 @@ class AINewsFetcher:
 
 {hashtags}"""
 
+        post_copy = clean_for_linkedin(raw_post)
+
         first_comment = (
-            f"⚡ Quick question for developers and founders: Are you currently running your workloads on proprietary APIs "
-            f"or migrating toward self-hosted open-weight models (like Nemotron/Llama)? Let's discuss in the thread!"
+            "⚡ Quick question for developers and founders: Are you currently running your workloads on proprietary APIs "
+            "or migrating toward self-hosted open-weight models (like Nemotron/Llama)? Let's discuss in the thread!"
         )
 
         return hook, post_copy, first_comment
 
     def schedule_daily_post(self, target_hour: int = 21, target_minute: int = 0, timezone_str: str = "Asia/Kolkata") -> dict:
-        """Generates the AI news post and schedules it on Buffer for 9:00 PM IST."""
+        """Generates the clean AI news post and schedules it on Buffer for 9:00 PM IST."""
         tz = ZoneInfo(timezone_str)
         now = datetime.now(tz)
 
         scheduled_dt = now.replace(hour=target_hour, minute=target_minute, second=0, microsecond=0)
-        if scheduled_dt <= now:
+        if scheduled_dt <= now and (now - scheduled_dt).total_seconds() > 300:
             scheduled_dt += timedelta(days=1)
 
         utc_dt = scheduled_dt.astimezone(timezone.utc)

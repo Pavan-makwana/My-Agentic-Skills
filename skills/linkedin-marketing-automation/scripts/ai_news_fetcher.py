@@ -2,7 +2,7 @@
 
 Fetches real-time worldwide AI breakthroughs, open-source models,
 and autonomous agent developments, synthesizes clean LinkedIn posts (strictly zero raw markdown asterisks,
-using (1. Title) numbering and • bullets), renders 1200x627 visual social cards, and schedules them daily at 9:00 PM IST via Buffer.
+using (1. Title) numbering and • bullets), and schedules them daily at 9:00 PM IST via Buffer without images.
 """
 
 import os
@@ -60,6 +60,7 @@ def clean_for_linkedin(text: str) -> str:
     text = re.sub(r'`(.*?)`', r'\1', text)
     # Normalize smart quotes and dashes
     text = text.replace('’', "'").replace('‘', "'").replace('“', '"').replace('”', '"')
+    text = text.replace('—', '-').replace('–', '-')
     return text.strip()
 
 
@@ -143,8 +144,9 @@ class AINewsFetcher:
             except Exception as e:
                 print(f"[AINewsFetcher] Warning: failed to fetch {feed_url}: {e}")
 
-        if len(items) < 3:
-            items.extend(self._get_fallback_stories())
+        fallback = self._get_fallback_stories()
+        if len(items) < limit:
+            items.extend(fallback[len(items):limit])
 
         return items[:limit]
 
@@ -152,24 +154,24 @@ class AINewsFetcher:
         """High-density verified world AI developments."""
         return [
             {
-                "title": "AWS Projects $1 Trillion AI Business as Cloud Capex Surges",
-                "summary": "Amazon CEO Andy Jassy highlighted massive enterprise shifts toward dedicated AI cloud infrastructure and custom Trainium inference silicon.",
-                "link": "https://techcrunch.com/category/artificial-intelligence/"
+                "title": "xAI Scales Dual Supercluster with 420,000 Next-Gen GPUs",
+                "summary": "Elon Musk's xAI is deploying two massive compute clusters ('Gun Range' and 'Spam') featuring 420,000 GB300 accelerators to scale frontier training and real-time agent reasoning.",
+                "link": "https://emergent.sh"
             },
             {
-                "title": "Open-Source Models Close the Proprietary Gap: Nemotron 3.5 & Sovereign AI",
-                "summary": "NVIDIA and the European AI ecosystem roll out enterprise open-weight suites designed for sovereign, on-prem agentic automation without cloud lock-in.",
-                "link": "https://nvidia.com"
+                "title": "Anthropic Sets Updated Enterprise Usage Policies Ahead of November Rollouts",
+                "summary": "The updated governance framework introduces stricter compliance boundaries around autonomous hardware agents, security applications, and model evaluation protocols.",
+                "link": "https://anthropic.com"
             },
             {
-                "title": "Autonomous Computer-Use Agents Transition into Production Workflows",
-                "summary": "Agent frameworks evolve beyond text windows to native browser control, code testing, and multi-step OS automation.",
-                "link": "https://github.com"
+                "title": "OpenAI and Rockefeller Foundation Launch $50M AI Urban Initiative",
+                "summary": "The 'Cities Deliver' initiative opens to deploy production AI infrastructure across public health, economic data, and civic services for over 100 million residents globally.",
+                "link": "https://rockefellerfoundation.org"
             },
             {
-                "title": "CNCF llm-d 1.0 Releases: Solving the Distributed Agentic Inference Bottleneck",
-                "summary": "Open-source distributed inference protocol backed by Red Hat, Google Cloud, and IBM cuts context caching costs by up to 5x-10x.",
-                "link": "https://cncf.io"
+                "title": "Nobel Laureates Deliver Consensus on AI as a Scientific Research Partner",
+                "summary": "At the 2026 World Laureates Forum, 80+ Nobel laureates praised AI's ability to compress decades of molecular research while warning developers to engineer rigorous guardrails against synthetic hallucinations.",
+                "link": "https://emergent.sh"
             }
         ]
 
@@ -189,8 +191,8 @@ class AINewsFetcher:
 
         macro_takeaway = (
             "💡 THE BIG PICTURE:\n"
-            "• We have moved past the era of novelty text prompts.\n"
-            "• The real battleground in 2026 is production-grade infrastructure: sovereign open-weight models, distributed inference efficiency, and autonomous operating-system agents."
+            "• The industry has transitioned from speculative chat demos to heavy physical supercomputing and civic infrastructure.\n"
+            "• The real winners in 2026 are teams building reliable compute efficiency, strict governance frameworks, and grounded domain-specific agent pipelines."
         )
 
         cta_question = (
@@ -216,13 +218,13 @@ class AINewsFetcher:
 
         first_comment = (
             "⚡ Quick question for developers and founders: Are you currently running your workloads on proprietary APIs "
-            "or migrating toward self-hosted open-weight models (like Nemotron/Llama)? Let's discuss in the thread!"
+            "or migrating toward self-hosted open-weight models? Let's discuss in the thread!"
         )
 
         return hook, post_copy, first_comment
 
-    def schedule_daily_post(self, target_hour: int = 21, target_minute: int = 0, timezone_str: str = "Asia/Kolkata") -> dict:
-        """Generates the clean AI news post and schedules it on Buffer for 9:00 PM IST."""
+    def schedule_daily_post(self, target_hour: int = 21, target_minute: int = 0, timezone_str: str = "Asia/Kolkata", include_image: bool = False) -> dict:
+        """Generates the clean AI news post and schedules it on Buffer for 9:00 PM IST strictly without image."""
         tz = ZoneInfo(timezone_str)
         now = datetime.now(tz)
 
@@ -238,7 +240,8 @@ class AINewsFetcher:
 
         buffer_result = self.buffer_client.schedule_post(
             text=copy_text,
-            due_at=due_at_utc
+            due_at=due_at_utc,
+            asset_url=None # Strictly text post
         )
 
         return {

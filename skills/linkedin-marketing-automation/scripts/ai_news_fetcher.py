@@ -2,7 +2,7 @@
 
 Fetches real-time worldwide AI breakthroughs, open-source models,
 and autonomous agent developments, synthesizes clean LinkedIn posts (strictly zero raw markdown asterisks,
-using (1. Title) numbering and ↳ bullets), renders 1200x627 visual social cards, and schedules them daily at 9:00 PM IST via Buffer.
+using (1. Title) numbering and • bullets), renders 1200x627 visual social cards, and schedules them daily at 9:00 PM IST via Buffer.
 """
 
 import os
@@ -174,7 +174,7 @@ class AINewsFetcher:
         ]
 
     def synthesize_post(self, news_items: list[dict], timezone_str: str = "Asia/Kolkata") -> tuple[str, str, str]:
-        """Synthesizes high-performing LinkedIn commentary strictly with (1. Title) and ↳ bullets."""
+        """Synthesizes high-performing LinkedIn commentary strictly with (1. Title) and • bullets."""
         today_date = datetime.now(ZoneInfo(timezone_str)).strftime('%B %d, %Y')
         
         hook = f"The global AI landscape is moving at breakneck speed. Here are the {len(news_items)} biggest breakthroughs you need to know today ({today_date}):"
@@ -183,18 +183,18 @@ class AINewsFetcher:
         for i, item in enumerate(news_items, 1):
             title = clean_for_linkedin(item['title'].strip())
             summary = clean_for_linkedin(item['summary'].strip())
-            bullet_blocks.append(f"({i}. {title})\n↳ {summary}")
+            bullet_blocks.append(f"({i}. {title})\n• {summary}")
 
         stories_text = "\n\n".join(bullet_blocks)
 
         macro_takeaway = (
             "💡 THE BIG PICTURE:\n"
-            "↳ We have moved past the era of novelty text prompts.\n"
-            "↳ The real battleground in 2026 is production-grade infrastructure: sovereign open-weight models, distributed inference efficiency, and autonomous operating-system agents."
+            "• We have moved past the era of novelty text prompts.\n"
+            "• The real battleground in 2026 is production-grade infrastructure: sovereign open-weight models, distributed inference efficiency, and autonomous operating-system agents."
         )
 
         cta_question = (
-            "↳ Which of these developments will have the biggest impact on your tech stack or business this year? Drop your thoughts below!"
+            "• Which of these developments will have the biggest impact on your tech stack or business this year? Drop your thoughts below!"
         )
 
         hashtags = (

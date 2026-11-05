@@ -61,6 +61,10 @@ flowchart TD
 | **`telegram-reel-publisher`** | [`skills/telegram-reel-publisher`](./skills/telegram-reel-publisher) | Distribution | Zero-dependency Telegram Bot API integration for auto-uploading and streaming 1080×1920 reels. |
 | **`linkedin-marketing-automation`** | [`skills/linkedin-marketing-automation`](./skills/linkedin-marketing-automation) | Growth & B2B | Autonomous B2B LinkedIn Company Page publishing via Buffer GraphQL API, deterministic 1200×627 cards, and Discord review gating. |
 | **`mca-lead-email-automation`** | [`skills/mca-lead-email-automation`](./skills/mca-lead-email-automation) | B2B Outreach | Autonomous MCA lead scraping, 21-digit CIN decoding, multi-industry classification (NIC codes), web enrichment & zero-emoji SMTP email automation. |
+| **`earshot`** | [`skills/earshot`](./skills/earshot) | Audio Intelligence | Gives coding agents "ears" using local CPU CLAP/AST models — loudness, spectral analysis, semantic match, realness scoring, and mix comparison. |
+| **`real-sound`** | [`skills/real-sound`](./skills/real-sound) | Sound Design | Builds premium realistic soundtracks for code-generated video (Remotion, GSAP, 3JS) using licensed recordings, deterministic mixing, and cue alignment. |
+| **`openverse-dev`** | [`skills/openverse-dev`](./skills/openverse-dev) | Blockchain & Web3 | End-to-end Openverse dApp, Anchor/Pinocchio program development, testing (Surfpool, Mollusk), wallet integration, and token tooling. |
+| **`sound-effects`** | [`skills/sound-effects`](./skills/sound-effects) | Generative Audio | Custom sound effect generation powered by AI models for impacts, foley, ambiences, UI sounds, transitions, and film/game production. |
 
 ---
 
